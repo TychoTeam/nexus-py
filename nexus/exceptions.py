@@ -74,3 +74,10 @@ class RateLimited(APIException):
 
     def __init__(self):
         super().__init__(40_022, "Too many requests")
+
+
+class InvalidDiscordUser(APIException):
+    """Exception raised when an invalid Discord user is used."""
+
+    def __init__(self):
+        super().__init__(60_002, "Invalid Discord user ID")

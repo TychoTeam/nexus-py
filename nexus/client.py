@@ -64,21 +64,27 @@ class Nexus:
 
     async def get_discord_account(self, id: int):
         """Get a Nexus account from a Discord user."""
-        return Account(
-            data=self._handle(
-                await self._requests.get("/accounts/discord/" + str(id)),
-                v1_AccountResponse,
-            ),
-        )
+        try:
+            return Account(
+                data=self._handle(
+                    await self._requests.get("/accounts/discord/" + str(id)),
+                    v1_AccountResponse,
+                ),
+            )
+        except UnknownDiscordAccount:
+            return None
 
     async def get_roblox_account(self, id: int):
         """Get a Nexus account from a Roblox user."""
-        return Account(
-            data=self._handle(
-                await self._requests.get("/accounts/roblox/" + str(id)),
-                v1_AccountResponse,
+        try:
+            return Account(
+                data=self._handle(
+                    await self._requests.get("/accounts/roblox/" + str(id)),
+                    v1_AccountResponse,
+                )
             )
-        )
+        except UnknownRobloxAccount:
+            return None
 
     async def create_session(self, id: int):
         """Create a Nexus verification session for a Discord user."""
