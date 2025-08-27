@@ -14,7 +14,7 @@ class PlatformAccount:
     """Represents a Nexus platform account."""
 
     def __init__(self, data: "v1_PlatformAccount"):
-        self.id = data.get("id")
+        self.id = int(data.get("id"))
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id}>"
