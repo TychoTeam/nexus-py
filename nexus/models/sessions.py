@@ -10,8 +10,11 @@ if TYPE_CHECKING:
 class Session:
     """Represents a Nexus verification session."""
 
-    def __init__(self, client: "Nexus", data: "v1_NewSessionResponse"):
+    def __init__(
+        self, client: "Nexus", data: "v1_NewSessionResponse", status_code: int
+    ):
         self._client = client
+        self._status_code = status_code
 
         self.code = data.get("code")
         self.url = data.get("url")
@@ -19,6 +22,11 @@ class Session:
         self.expires_at = datetime.fromisoformat(
             data.get("expires_at").replace("Z", "+00:00")
         )
+
+    @property
+    def reused(self):
+        """Whether this session URL has been reused (multiple requests with the same user)."""
+        return self._status_code == 200
 
     async def wait(self):
         """Wait until the verification session is over. Returns whether the session was successful or not (account created/updated)."""

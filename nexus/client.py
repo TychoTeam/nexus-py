@@ -5,7 +5,7 @@ The main client.
 """
 
 from .requests import Requests
-from typing import List, Callable, Type, TypeVar, Dict, Any
+from typing import List, Callable, Type, TypeVar, Dict, Any, Tuple
 from .api_types.v1 import *
 from .exceptions import *
 from .models import *
@@ -57,10 +57,12 @@ class Nexus:
             f"An unknown API error has occured: {response.get('message') or '...'}",
         )
 
-    def _handle(self, response: httpx.Response, return_type: Type[R]) -> R:
+    def _handle(
+        self, response: httpx.Response, return_type: Type[R]
+    ) -> Tuple[R, httpx.Response]:
         if not response.is_success:
             self._raise_error_code(response.json())
-        return response.json()
+        return response.json(), response
 
     async def get_discord_account(self, id: int):
         """Get a Nexus account from a Discord user."""
@@ -69,7 +71,7 @@ class Nexus:
                 data=self._handle(
                     await self._requests.get("/accounts/discord/" + str(id)),
                     v1_AccountResponse,
-                ),
+                )[0],
             )
         except UnknownDiscordAccount:
             return None
@@ -81,19 +83,17 @@ class Nexus:
                 data=self._handle(
                     await self._requests.get("/accounts/roblox/" + str(id)),
                     v1_AccountResponse,
-                )
+                )[0]
             )
         except UnknownRobloxAccount:
             return None
 
     async def create_session(self, id: int):
         """Create a Nexus verification session for a Discord user."""
-        return Session(
-            self,
-            data=self._handle(
-                await self._requests.post(
-                    "/sessions", json={"platform": Platform.DISCORD, "user_id": str(id)}
-                ),
-                v1_NewSessionResponse,
+        r = self._handle(
+            await self._requests.post(
+                "/sessions", json={"platform": Platform.DISCORD, "user_id": str(id)}
             ),
+            v1_NewSessionResponse,
         )
+        return Session(self, data=r[0], status_code=r[1].status_code)
