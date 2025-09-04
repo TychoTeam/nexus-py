@@ -88,6 +88,16 @@ class Nexus:
         except UnknownRobloxAccount:
             return None
 
+    async def get_roblox_accounts(self, ids: List[int]):
+        """Get Nexus accounts from Roblox users."""
+        r = self._handle(
+            await self._requests.get(
+                "/accounts/roblox?ids=" + "&ids=".join([str(id) for id in ids])
+            ),
+            v1_AccountsResponse,
+        )[0]
+        return {k: Account(data=v) if v else None for k, v in r.items()}
+
     async def create_session(self, id: int):
         """Create a Nexus verification session for a Discord user."""
         r = self._handle(
