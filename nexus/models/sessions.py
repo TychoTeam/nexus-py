@@ -40,4 +40,4 @@ class Session:
             return False
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} code={self.code}, renewed={self.renewed}, expires_at={self.expires_at}>"
+        return f"<{self.__class__.__name__} code={self.code}, reused={self.reused}, renewed={self.renewed}, expires_at={self.expires_at}>"
