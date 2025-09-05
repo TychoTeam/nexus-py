@@ -96,7 +96,7 @@ class Nexus:
             ),
             v1_AccountsResponse,
         )[0]
-        return {k: Account(data=v) if v else None for k, v in r.items()}
+        return {int(k): Account(data=v) if v else None for k, v in r.items()}
 
     async def create_session(self, id: int):
         """Create a Nexus verification session for a Discord user."""
