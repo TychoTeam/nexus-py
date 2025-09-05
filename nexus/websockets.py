@@ -12,6 +12,8 @@ class OperationCode(IntEnum):
     CONNECTED = 1
     AUTHENTICATE = 2
     AUTHENTICATED = 3
+    PING = 6
+    PONG = 7
 
 
 class RTS:
@@ -65,6 +67,10 @@ class RTS:
                         continue
 
                     if op == OperationCode.AUTHENTICATED:
+                        continue
+
+                    if op == OperationCode.PING:
+                        await self.send(OperationCode.PONG)
                         continue
 
                     if op == OperationCode.DISPATCH:
