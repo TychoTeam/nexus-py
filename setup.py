@@ -6,6 +6,7 @@ setuptools.setup(
     name="tycho.nexus",
     description="The official Python API wrapper for Nexus, by Tycho",
     license="MIT",
+    url="https://github.com/TychoTeam/nexus-py",
     # README
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
