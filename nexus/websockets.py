@@ -1,8 +1,9 @@
-from typing import Optional, Callable, Awaitable, Any
-from websockets import WebSocketClientProtocol
+from websockets.asyncio.client import ClientConnection
+from typing import Dict, Optional, Callable, Awaitable
+from websockets.asyncio import client as websockets
+from websockets import ConnectionClosed
 from .exceptions import NexusException
-from enum import IntEnum
-import websockets
+from enum import Enum, IntEnum
 import asyncio
 import json
 
@@ -14,6 +15,10 @@ class OperationCode(IntEnum):
     AUTHENTICATED = 3
     PING = 6
     PONG = 7
+
+
+class DispatchEventName(str, Enum):
+    SOCKET_CLOSING_HINT = "SOCKET_CLOSING_HINT"
 
 
 class RTS:
@@ -28,14 +33,14 @@ class RTS:
         self._reconnect_attempts = reconnect_attempts
 
         self.session_code: Optional[str] = None
-        self.ws: Optional[WebSocketClientProtocol] = None
+        self.ws: Optional[ClientConnection] = None
 
     async def connect(self, path: str) -> None:
         url = f"{self._base_url}{path}"
 
         for attempt in range(self._reconnect_attempts):
             try:
-                self.ws = await websockets.connect(url)
+                self.ws = await websockets.connect(url, ping_timeout=None)
                 return
             except Exception:
                 await asyncio.sleep(1)
@@ -75,25 +80,25 @@ class RTS:
 
                     if op == OperationCode.DISPATCH:
                         if (
-                            data
-                            and isinstance(data, dict)
-                            and data.get("event") == "SOCKET_CLOSING_HINT"
+                            isinstance(data, dict)
+                            and data.get("event")
+                            == DispatchEventName.SOCKET_CLOSING_HINT
                         ):
                             payload = data.get("payload")
-                            if payload and isinstance(payload, dict):
+                            if isinstance(payload, dict):
                                 if payload.get("code") == 1000:
                                     return
 
                     if handler:
                         await handler(message)
 
-                except json.JSONDecodeError or AssertionError:
+                except json.JSONDecodeError or AssertionError as e:
                     pass
 
         finally:
             await self.close()
 
-    async def send(self, op: int, data: Any = None):
+    async def send(self, op: int, data: Optional[Dict] = None):
         if not self.ws:
             raise NexusException("WebSocket not connected.")
 

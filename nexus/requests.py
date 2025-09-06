@@ -7,6 +7,17 @@ import httpx
 R = TypeVar("R", bound=str)
 
 
+class CleanAsyncClient(httpx.AsyncClient):
+    def __init__(self):
+        super().__init__()
+
+    def __del__(self):
+        try:
+            asyncio.get_event_loop().create_task(self.aclose())
+        except RuntimeError:
+            pass
+
+
 class Bucket:
     def __init__(self, name: str, limit: int, remaining: int, reset_at: float):
         self.name = name
@@ -65,14 +76,14 @@ class Requests(Generic[R]):
         self,
         base_url: str,
         headers: Optional[Dict[str, str]] = None,
-        session: Optional[httpx.AsyncClient] = None,
+        session: Optional[CleanAsyncClient] = None,
         max_retries: int = 3,
         max_retry_after: float = 15.0,
         timeout: float = 5.0,
     ):
         self._base_url = base_url.rstrip("/")
         self._headers = headers or {}
-        self._session = session or httpx.AsyncClient()
+        self._session = session or CleanAsyncClient()
         self._max_retries = max_retries
         self._max_retry_after = max_retry_after
         self._timeout = timeout

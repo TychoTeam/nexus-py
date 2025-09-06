@@ -1,5 +1,5 @@
+from nexus.websockets import RTS, ConnectionClosed
 from typing import TYPE_CHECKING
-from nexus.websockets import RTS, websockets
 from datetime import datetime
 
 if TYPE_CHECKING:
@@ -36,7 +36,7 @@ class Session:
         try:
             await rts.listen()
             return True
-        except websockets.ConnectionClosed:
+        except ConnectionClosed:
             return False
 
     def __repr__(self) -> str:
