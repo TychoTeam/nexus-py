@@ -27,16 +27,22 @@ class Bucket:
 
 
 class RateLimiter:
-    def __init__(self):
+    def __init__(self, capacity: int = 3, refill_rate: float = 1.0):
         self.route_buckets: Dict[str, str] = {}
         self.buckets: Dict[str, Bucket] = {}
+
+        self.capacity = capacity
+        self.refill_rate = refill_rate
+
+        self.tokens = self.capacity
+        self.last_checked = time()
+        self.lock = asyncio.Lock()
 
     def save_bucket(self, route: str, headers: httpx.Headers) -> None:
         bucket_name = headers.get("X-RateLimit-Bucket", "Unknown")
         limit = int(headers.get("X-RateLimit-Limit", 0))
         remaining = int(headers.get("X-RateLimit-Remaining", 0))
         reset_at = float(headers.get("X-RateLimit-Reset", time()))
-
         if bucket_name:
             self.route_buckets[route] = bucket_name
             self.buckets[bucket_name] = Bucket(bucket_name, limit, remaining, reset_at)
@@ -48,6 +54,19 @@ class RateLimiter:
         return None
 
     async def avoid_limit(self, route: str, max_retry_after: float) -> None:
+        async with self.lock:
+            now = time()
+            elapsed = now - self.last_checked
+            self.last_checked = now
+            self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
+            if self.tokens < 1:
+                wait_time = (1 - self.tokens) / self.refill_rate
+                await asyncio.sleep(wait_time)
+                self.tokens = min(
+                    self.capacity, self.tokens + wait_time * self.refill_rate
+                )
+            self.tokens -= 1
+
         bucket = self.get_bucket(route)
         if bucket and bucket.remaining <= 0:
             wait_time = bucket.reset_at - time()
