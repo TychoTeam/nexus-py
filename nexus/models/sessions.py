@@ -11,11 +11,12 @@ class Session:
     """Represents a Nexus verification session."""
 
     def __init__(
-        self, client: "Nexus", data: "v1_NewSessionResponse", status_code: int
+        self, client: "Nexus", data: "v1_NewSessionResponse", status_code: int, id: int
     ):
         self._client = client
         self._status_code = status_code
 
+        self.id = id
         self.code = data.get("code")
         self.url = data.get("url")
         self.renewed = data.get("renewed")
@@ -35,6 +36,12 @@ class Session:
 
         try:
             await rts.listen()
+
+            _cached = self._client._cache.discord_accounts.get(self.id)
+            if _cached:
+                self._client._cache.discord_accounts.delete(_cached.discord.id)
+                self._client._cache.roblox_accounts.delete(_cached.roblox.id)
+
             return True
         except ConnectionClosed:
             return False

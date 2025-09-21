@@ -24,8 +24,8 @@ class ClientCache:
 
     def __init__(
         self,
-        roblox_accounts: CacheConfig = (250, 120),
-        discord_accounts: CacheConfig = (250, 120),
+        roblox_accounts: CacheConfig = (250, 15 * 60),
+        discord_accounts: CacheConfig = (250, 15 * 60),
     ):
         self.roblox_accounts = Cache[int, Account](*roblox_accounts)
         self.discord_accounts = Cache[int, Account](*discord_accounts)
@@ -64,7 +64,7 @@ class Nexus:
         nexus_key: str,
         _base_url: str = "https://api.tycho.team/nexus/v1",
         _rts_base_url: str = "wss://rts.tycho.team/nexus/v1",
-        _ephemeral_ttl: int = 10,
+        _ephemeral_ttl: int = 5,
         _cache: Optional[ClientCache] = None,
     ):
         self._nexus_key = nexus_key
@@ -149,13 +149,13 @@ class Nexus:
     @_ephemeral
     async def get_roblox_accounts(self, ids: List[int]):
         """Get Nexus accounts from Roblox users."""
-        _found_in_cache = {
+        _cached = {
             a.roblox.id: a
             for a in [self._cache.roblox_accounts.get(id) for id in ids]
             if a
         }
-        if len(_found_in_cache) == len(ids):
-            return _found_in_cache
+        if len(_cached) == len(ids):
+            return _cached
 
         r = self._handle(
             await self._requests.get(
@@ -173,4 +173,4 @@ class Nexus:
             ),
             v1_NewSessionResponse,
         )
-        return Session(self, data=r[0], status_code=r[1].status_code)
+        return Session(self, data=r[0], status_code=r[1].status_code, id=id)
