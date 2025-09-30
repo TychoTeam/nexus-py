@@ -27,57 +27,36 @@ class APIException(NexusException):
 # Exceptions
 
 
-class UnknownDiscordUser(APIException):
-    """Exception raised when a non-existing Discord user is used."""
+class InvalidRequest(APIException):
+    """Exception raised when an invalid request is made."""
 
-    def __init__(self):
-        super().__init__(10_003, "Unknown Discord user")
-
-
-class UnknownKey(APIException):
-    """Exception raised when a non-existing API key is used."""
-
-    def __init__(self):
-        super().__init__(10_006, "Unknown API key")
+    def __init__(self, message: str):
+        super().__init__(3001, message)
 
 
-class UnknownDiscordAccount(APIException):
-    """Exception raised when a Discord account was queried but not found."""
+class InvalidAuthentication(APIException):
+    """Exception [usually] raised when an invalid API key is used."""
 
-    def __init__(self):
-        super().__init__(10_007, "Unknown Discord account")
-
-
-class UnknownRobloxAccount(APIException):
-    """Exception raised when a Roblox account was queried but not found."""
-
-    def __init__(self):
-        super().__init__(10_008, "Unknown Roblox account")
-
-
-class InternalError(APIException):
-    """Exception raised when an internal server-side error occurs."""
-
-    def __init__(self):
-        super().__init__(30_001, "Internal server error")
-
-
-class InvalidParameter(APIException):
-    """Exception raised when an invalid parameter is used."""
-
-    def __init__(self):
-        super().__init__(40_006, "Invalid paramater")
+    def __init__(self, message: str):
+        super().__init__(3013, message)
 
 
 class RateLimited(APIException):
     """Exception raised when (somehow) a rate limit is hit."""
 
-    def __init__(self):
-        super().__init__(40_022, "Too many requests")
+    def __init__(self, message: str):
+        super().__init__(3029, message)
 
 
-class InvalidDiscordUser(APIException):
-    """Exception raised when an invalid Discord user is used."""
+class UnknownAccount(APIException):
+    """Exception raised when an account was queried but not found."""
 
-    def __init__(self):
-        super().__init__(60_002, "Invalid Discord user ID")
+    def __init__(self, message: str):
+        super().__init__(4002, message)
+
+
+class UnknownDiscordUser(APIException):
+    """Exception raised when a non-existing Discord user is used."""
+
+    def __init__(self, message: str):
+        super().__init__(6014, message)

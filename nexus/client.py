@@ -84,17 +84,15 @@ class Nexus:
             raise NexusException("No error was received.")
 
         exceptions: List[Callable[..., APIException]] = [
-            UnknownDiscordUser,
-            UnknownKey,
-            UnknownDiscordAccount,
-            UnknownRobloxAccount,
-            InternalError,
-            InvalidParameter,
+            InvalidRequest,
+            InvalidAuthentication,
             RateLimited,
+            UnknownAccount,
+            UnknownDiscordUser,
         ]
 
         for _exception in exceptions:
-            exception = _exception()
+            exception = _exception(message=response.get("message"))
             if error_code == exception.code:
                 raise exception
 
@@ -125,7 +123,7 @@ class Nexus:
                     v1_AccountResponse,
                 )[0],
             )
-        except UnknownDiscordAccount:
+        except UnknownAccount:
             return None
 
     @_ephemeral
@@ -143,7 +141,7 @@ class Nexus:
                     v1_AccountResponse,
                 )[0],
             )
-        except UnknownRobloxAccount:
+        except UnknownAccount:
             return None
 
     @_ephemeral

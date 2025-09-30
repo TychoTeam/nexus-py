@@ -1,7 +1,6 @@
 from websockets.asyncio.client import ClientConnection
 from typing import Dict, Optional, Callable, Awaitable
 from websockets.asyncio import client as websockets
-from websockets import ConnectionClosed
 from .exceptions import NexusException
 from enum import Enum, IntEnum
 import asyncio
