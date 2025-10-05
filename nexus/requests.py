@@ -131,7 +131,9 @@ class Requests(Generic[R]):
         except httpx.ReadTimeout:
             if self._can_retry(500, retry):
                 await asyncio.sleep(retry * 1.5)
-                return await self._make_request(method, route, retry + 1, **kwargs)
+                return await self._make_request(
+                    method, route, retry + 1, **kwargs, headers=headers
+                )
             raise NexusException(
                 f"Nexus API took too long to respond. ({retry}/{self._max_retries} retries) ({self._timeout}s timeout)"
             )
@@ -142,7 +144,9 @@ class Requests(Generic[R]):
             if await self._rate_limiter.wait_to_retry(
                 response.headers, self._max_retry_after
             ):
-                return await self._make_request(method, route, retry + 1, **kwargs)
+                return await self._make_request(
+                    method, route, retry + 1, **kwargs, headers=headers
+                )
 
         return response
 
