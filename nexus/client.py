@@ -62,12 +62,14 @@ class Nexus:
     def __init__(
         self,
         nexus_key: str,
+        bloxlink_key: Optional[str] = None,
         _base_url: str = "https://api.tycho.team/nexus/v1",
         _rts_base_url: str = "wss://rts.tycho.team/nexus/v1",
         _ephemeral_ttl: int = 5,
         _cache: Optional[ClientCache] = None,
     ):
         self._nexus_key = nexus_key
+        self._bloxlink_key = bloxlink_key
         self._requests = Requests(
             base_url=_base_url, headers={"X-Nexus-Key": nexus_key}
         )
@@ -172,3 +174,40 @@ class Nexus:
             v1_NewSessionResponse,
         )
         return Session(self, data=r[0], status_code=r[1].status_code, id=id)
+
+    @_ephemeral
+    async def verify_discord_account(
+        self,
+        user_id: int,
+        guild_id: int,
+        provider: ExternalAccountProvider = ExternalAccountProvider.BLOXLINK,
+    ):
+        """Attempt to verify a Discord user using an external account provider."""
+        _cached = self._cache.discord_accounts.get(user_id)
+        if _cached:
+            return _cached
+
+        try:
+            if provider == ExternalAccountProvider.BLOXLINK:
+                if self._bloxlink_key is None:
+                    raise NexusException("No bloxlink-key provided but is required.")
+
+                return Account(
+                    self,
+                    data=self._handle(
+                        await self._requests.post(
+                            "/accounts/discord/external",
+                            json={
+                                "user_id": str(user_id),
+                                "guild_id": str(guild_id),
+                                "provider": provider,
+                            },
+                            headers={"X-External-Provider-Key": self._bloxlink_key},
+                        ),
+                        v1_VerifyExternalAccountResponse,
+                    )[0],
+                )
+        except APIException:
+            return None
+
+        raise NexusException(f"Unknown external account provider: {provider}")

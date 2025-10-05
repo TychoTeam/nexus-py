@@ -11,6 +11,10 @@ class Platform(IntEnum):
     ROBLOX = 1
 
 
+class ExternalAccountProvider(IntEnum):
+    BLOXLINK = 0
+
+
 class PlatformAccount:
     """Represents a Nexus platform account."""
 

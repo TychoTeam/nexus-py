@@ -35,7 +35,7 @@ class InvalidRequest(APIException):
 
 
 class InvalidAuthentication(APIException):
-    """Exception [usually] raised when an invalid API key is used."""
+    """Exception [usually] raised when invalid authentication data is used."""
 
     def __init__(self, message: str):
         super().__init__(3013, message)

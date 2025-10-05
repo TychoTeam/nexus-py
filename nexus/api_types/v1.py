@@ -17,4 +17,9 @@ class v1_AccountResponse(TypedDict):
     discord: v1_PlatformAccount
 
 
+class v1_VerifyExternalAccountResponse(TypedDict):
+    roblox: v1_PlatformAccount
+    discord: v1_PlatformAccount
+
+
 v1_AccountsResponse = Dict[str, Union[v1_AccountResponse, None]]
