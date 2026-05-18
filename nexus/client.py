@@ -63,6 +63,7 @@ class Nexus:
         self,
         nexus_key: str,
         bloxlink_key: Optional[str] = None,
+        server_key: Optional[str] = None,
         _base_url: str = "https://api.tycho.team/nexus/v1",
         _rts_base_url: str = "wss://rts.tycho.team/nexus/v1",
         _ephemeral_ttl: int = 5,
@@ -70,6 +71,7 @@ class Nexus:
     ):
         self._nexus_key = nexus_key
         self._bloxlink_key = bloxlink_key
+        self._server_key = server_key
         self._requests = Requests(
             base_url=_base_url, headers={"X-Nexus-Key": nexus_key}
         )
@@ -165,14 +167,16 @@ class Nexus:
         )[0]
         return {int(k): Account(self, data=v) if v else None for k, v in r.items()}
 
-    async def create_session(self, id: int, *, use_server_key: str):
-        """Create a Nexus verification session for a Discord user."""
-        body = {
+    async def create_session(self, id: int, *, use_server_key: bool = False):
+        """Create a Nexus verification session for a Discord user. `use_server_key` decides whether ER:LC can be used for verification."""
+        body: Dict[str, str | int] = {
             "platform": Platform.DISCORD,
             "user_id": str(id),
         }
-        if use_server_key:
-            body["use_server_key"] = use_server_key
+        if use_server_key is True:
+            if not self._server_key:
+                raise NexusException("No server-key provided but is required.")
+            body["use_server_key"] = self._server_key
 
         r = self._handle(
             await self._requests.post(
