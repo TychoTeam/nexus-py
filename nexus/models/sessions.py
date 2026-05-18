@@ -1,4 +1,5 @@
-from nexus.websockets import RTS, ConnectionClosed
+from websockets import ConnectionClosed
+from nexus.websockets import RTS
 from typing import TYPE_CHECKING
 from datetime import datetime
 

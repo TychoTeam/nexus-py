@@ -1,7 +1,6 @@
 from websockets.asyncio.client import ClientConnection
 from typing import Dict, Optional, Callable, Awaitable
 from websockets.asyncio import client as websockets
-from websockets import ConnectionClosed
 from .exceptions import NexusException
 from enum import Enum, IntEnum
 import asyncio
@@ -38,7 +37,7 @@ class RTS:
     async def connect(self, path: str) -> None:
         url = f"{self._base_url}{path}"
 
-        for attempt in range(self._reconnect_attempts):
+        for _ in range(self._reconnect_attempts):
             try:
                 self.ws = await websockets.connect(url, ping_timeout=None)
                 return
@@ -92,7 +91,7 @@ class RTS:
                     if handler:
                         await handler(message)
 
-                except json.JSONDecodeError or AssertionError as e:
+                except json.JSONDecodeError or AssertionError:
                     pass
 
         finally:

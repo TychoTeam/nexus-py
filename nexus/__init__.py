@@ -10,5 +10,7 @@ License: MIT, see LICENSE
 
 """
 
+# pyright: reportUnusedImport=false
+
 from nexus.models import *
 from nexus.client import Nexus

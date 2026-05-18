@@ -1,5 +1,5 @@
-from typing import Dict, Generic, Optional, TypeVar, Tuple, List, Callable, Any, Deque
-from collections import OrderedDict, deque
+from typing import Dict, Generic, Optional, TypeVar, Tuple, List
+from collections import OrderedDict
 from time import time
 
 CacheConfig = Tuple[int, int]
