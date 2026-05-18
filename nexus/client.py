@@ -165,11 +165,19 @@ class Nexus:
         )[0]
         return {int(k): Account(self, data=v) if v else None for k, v in r.items()}
 
-    async def create_session(self, id: int):
+    async def create_session(self, id: int, *, use_server_key: str):
         """Create a Nexus verification session for a Discord user."""
+        body = {
+            "platform": Platform.DISCORD,
+            "user_id": str(id),
+        }
+        if use_server_key:
+            body["use_server_key"] = use_server_key
+
         r = self._handle(
             await self._requests.post(
-                "/sessions", json={"platform": Platform.DISCORD, "user_id": str(id)}
+                "/sessions",
+                json=body,
             ),
             v1_NewSessionResponse,
         )
